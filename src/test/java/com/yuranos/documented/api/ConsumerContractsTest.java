@@ -28,12 +28,11 @@ import org.springframework.web.client.RestTemplate;
                         stubsMode = StubRunnerProperties.StubsMode.REMOTE)
 public class ConsumerContractsTest {
 
+    @Value("${stubrunner.runningstubs.raml-based-producer-application.port}")
+    private int port;
+
     @Autowired
     private RestTemplateBuilder builder;
-
-    @StubRunnerPort("raml-based-producer-application")
-    private int fraudDetectionServerPort;
-
 
     private RestTemplate restTemplate;
 
@@ -57,7 +56,7 @@ public class ConsumerContractsTest {
     private HttpStatus createBooking(String booking) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return restTemplate.exchange("http://localhost:" + fraudDetectionServerPort + "/bookings", HttpMethod.POST,
+        return restTemplate.exchange("http://localhost:" + port + "/bookings", HttpMethod.POST,
                 new HttpEntity<>(booking, httpHeaders),
                 Booking.class).getStatusCode();
     }
