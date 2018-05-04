@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cloud.contract.spec.Contract;
+import org.springframework.cloud.contract.stubrunner.StubConfiguration;
 import org.springframework.cloud.contract.stubrunner.StubFinder;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerPort;
@@ -21,6 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URL;
+import java.util.Collection;
+import java.util.Map;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureStubRunner(ids = {"com.yuranos.documented.api:raml-based-producer-application:0.0.1-SNAPSHOT"},
@@ -28,8 +34,8 @@ import org.springframework.web.client.RestTemplate;
                         stubsMode = StubRunnerProperties.StubsMode.REMOTE)
 public class ConsumerContractsTest {
 
-    @Value("${stubrunner.runningstubs.raml-based-producer-application.port}")
-    private int port;
+    @Autowired
+    StubFinder stubFinder;
 
     @Autowired
     private RestTemplateBuilder builder;
@@ -56,7 +62,8 @@ public class ConsumerContractsTest {
     private HttpStatus createBooking(String booking) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-        return restTemplate.exchange("http://localhost:" + port + "/bookings", HttpMethod.POST,
+        URL stubUrl = stubFinder.findStubUrl("com.yuranos.documented.api:raml-based-producer-application");
+        return restTemplate.exchange("http://localhost:" + stubUrl.getPort() + "/bookings", HttpMethod.POST,
                 new HttpEntity<>(booking, httpHeaders),
                 Booking.class).getStatusCode();
     }
